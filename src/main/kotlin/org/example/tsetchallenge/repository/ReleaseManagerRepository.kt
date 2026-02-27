@@ -4,7 +4,7 @@ import java.util.Objects
 
 class ReleaseManagerRepository {
 
-    fun getReleases(systemVersion: Int): List<Objects> {
+    fun getServiceReleases(systemVersion: Int): List<Objects> {
         return listOf()
     }
 

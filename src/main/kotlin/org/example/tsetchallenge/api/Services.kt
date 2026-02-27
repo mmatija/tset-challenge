@@ -1,7 +1,7 @@
 package org.example.tsetchallenge.api
 
 import jakarta.validation.constraints.Positive
-import org.example.tsetchallenge.models.Service
+import org.example.tsetchallenge.models.ServiceRelease
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
@@ -19,7 +19,7 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 class Services {
 
     @RequestMapping(value = [""], method = [RequestMethod.GET], produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun getServices(@RequestParam @Positive systemVersion: Int): List<Service> {
+    fun getServices(@RequestParam @Positive systemVersion: Int): List<ServiceRelease> {
         return listOf()
     }
 

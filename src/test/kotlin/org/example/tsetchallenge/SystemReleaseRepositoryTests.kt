@@ -6,13 +6,13 @@ import org.springframework.boot.test.context.SpringBootTest
 import kotlin.test.assertTrue
 
 @SpringBootTest
-class ReleaseManagerRepositoryTests {
+class SystemReleaseRepositoryTests {
 
     val releaseManagerRepository = ReleaseManagerRepository()
 
     @Test
-    fun `getReleases returns empty list when there are no releases for given system version`() {
-        val releases = releaseManagerRepository.getReleases(systemVersion=1)
+    fun `getServiceReleases returns empty list when there are no service releases for given system version`() {
+        val releases = releaseManagerRepository.getServiceReleases(systemVersion=1)
         assertTrue { releases.isEmpty() }
     }
 
