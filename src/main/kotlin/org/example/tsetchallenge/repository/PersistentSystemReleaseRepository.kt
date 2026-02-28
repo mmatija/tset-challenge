@@ -8,7 +8,8 @@ import org.springframework.transaction.support.TransactionTemplate
 
 
 @Repository
-class PersistentSystemReleaseRepository(val jdbcTemplate: JdbcTemplate, val transactionTemplate: TransactionTemplate) : SystemReleaseRepository {
+class PersistentSystemReleaseRepository(val jdbcTemplate: JdbcTemplate, val transactionTemplate: TransactionTemplate) :
+    SystemReleaseRepository {
 
     override fun getServiceReleases(systemVersion: Int): List<ServiceRelease> {
         return jdbcTemplate.query(
@@ -20,28 +21,42 @@ class PersistentSystemReleaseRepository(val jdbcTemplate: JdbcTemplate, val tran
         )
     }
 
-    override fun createRelease(changeset: ServiceRelease, systemReleaseVersion: Int) {
-        try {
+    override fun createRelease(changeset: ServiceRelease): Int {
+        return try {
             transactionTemplate.execute {
-                jdbcTemplate.update(
-                    "INSERT INTO service_releases(service_name, service_version) VALUES (?, ?)",
-                    changeset.serviceName,
-                    changeset.serviceVersion
-                )
-                jdbcTemplate.update("INSERT INTO system_release_versions(version) VALUES (?)", systemReleaseVersion)
-                jdbcTemplate.update(
-                    "INSERT INTO system_releases(service_name, service_version, system_release_version) select distinct on (service_name) service_name, service_version, ? FROM service_releases ORDER BY service_name, service_version DESC",
-                    systemReleaseVersion
-                )
+                createServiceRelease(changeset)
+                incrementSystemReleaseVersion()
+                associateServiceReleasesWithLatestSystemReleaseVersion()
+                fetchLatestSystemReleaseVersion()
             }
         } catch (e: DuplicateKeyException) {
             if (e.localizedMessage.contains("service_release")) {
-                throw ServiceReleaseAlreadyExistsException("Release version ${changeset.serviceVersion} for service ${changeset.serviceName} already exists")
-            } else if (e.localizedMessage.contains("system_release_version")) {
-                throw SystemReleaseVersionAlreadyExistsException("System release version $systemReleaseVersion already exists")
+                fetchLatestSystemReleaseVersion()
             } else {
                 throw e
             }
         }
     }
+
+    private fun associateServiceReleasesWithLatestSystemReleaseVersion() {
+        jdbcTemplate.update(
+            "INSERT INTO system_releases(service_name, service_version, system_release_version) select distinct on (service_name) service_name, service_version, (select max(version) from system_release_versions) FROM service_releases ORDER BY service_name, service_version DESC"
+        )
+    }
+
+    private fun incrementSystemReleaseVersion() {
+        jdbcTemplate.update("INSERT INTO system_release_versions(version) select coalesce(max(version), 0) + 1 from system_release_versions")
+    }
+
+    private fun createServiceRelease(changeset: ServiceRelease) {
+        jdbcTemplate.update(
+            "INSERT INTO service_releases(service_name, service_version) VALUES (?, ?)",
+            changeset.serviceName,
+            changeset.serviceVersion
+        )
+    }
+
+    private fun fetchLatestSystemReleaseVersion(): Int =
+        jdbcTemplate.query("SELECT max(version) as max_version FROM system_release_versions") { rs, _ -> rs.getInt("max_version") }
+            .first()
 }

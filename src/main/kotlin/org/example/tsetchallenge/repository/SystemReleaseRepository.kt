@@ -4,5 +4,5 @@ import org.example.tsetchallenge.models.ServiceRelease
 
 interface SystemReleaseRepository {
     fun getServiceReleases(systemVersion: Int): List<ServiceRelease>
-    fun createRelease(changeset: ServiceRelease, systemReleaseVersion: Int)
+    fun createRelease(changeset: ServiceRelease): Int
 }
