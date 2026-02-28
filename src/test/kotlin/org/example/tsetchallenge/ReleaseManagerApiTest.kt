@@ -81,6 +81,13 @@ class ReleaseManagerApiTest(@Autowired val mockMvc: MockMvc) : BaseTest() {
             createServiceRelease(release).andExpect { content { string("1") } }
         }
 
+        @Test
+        fun `returns the latest system release version when service release already exists`() {
+            val release = ServiceRelease("service3", 1)
+            createServiceRelease(release)
+            createServiceRelease(release).andExpect { content { string("1") } }
+        }
+
     }
 
     private fun createServiceRelease(serviceRelease: ServiceRelease): ResultActionsDsl = mockMvc.post("/deploy") {
