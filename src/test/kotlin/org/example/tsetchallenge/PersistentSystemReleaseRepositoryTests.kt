@@ -40,11 +40,35 @@ lateinit var systemReleaseRepository: PersistentSystemReleaseRepository
         }
 
         @Test
+        fun `associates all latest service releases with given system release version`() {
+            val serviceRelease1 = ServiceRelease("Service A", 1)
+            val serviceRelease2 = ServiceRelease("Service B", 1)
+            val serviceRelease3 = ServiceRelease("Service A", 2)
+            systemReleaseRepository.createRelease(changeset=serviceRelease1, systemReleaseVersion=1)
+            systemReleaseRepository.createRelease(changeset=serviceRelease2, systemReleaseVersion=2)
+            systemReleaseRepository.createRelease(changeset=serviceRelease3, systemReleaseVersion=3)
+            val releases = systemReleaseRepository.getServiceReleases(systemVersion=3)
+            assertEquals(listOf(serviceRelease3, serviceRelease2),releases.sortedBy { serviceRelease -> serviceRelease.serviceName } )
+        }
+
+        @Test
+        fun `does not remove association to services released in previous system versions`() {
+            val serviceRelease1 = ServiceRelease("Service A", 1)
+            val serviceRelease2 = ServiceRelease("Service B", 1)
+            val serviceRelease3 = ServiceRelease("Service A", 2)
+            systemReleaseRepository.createRelease(changeset=serviceRelease1, systemReleaseVersion=1)
+            systemReleaseRepository.createRelease(changeset=serviceRelease2, systemReleaseVersion=2)
+            systemReleaseRepository.createRelease(changeset=serviceRelease3, systemReleaseVersion=3)
+            val releases = systemReleaseRepository.getServiceReleases(systemVersion=2)
+            assertEquals(listOf(serviceRelease1, serviceRelease2),releases.sortedBy { serviceRelease -> serviceRelease.serviceName } )
+        }
+
+        @Test
         fun `throws an exception if service release already exists`() {
             val serviceRelease = ServiceRelease("Service A", 1)
             systemReleaseRepository.createRelease(changeset=serviceRelease, systemReleaseVersion=1)
             val exception = assertThrows<ServiceReleaseAlreadyExistsException> { systemReleaseRepository.createRelease(changeset=serviceRelease, systemReleaseVersion=2) }
-            assertEquals(exception.message, "Release version ${serviceRelease.serviceVersion} for service ${serviceRelease.serviceName} already exists")
+            assertEquals("Release version ${serviceRelease.serviceVersion} for service ${serviceRelease.serviceName} already exists", exception.message)
         }
 
         @Test
@@ -54,9 +78,7 @@ lateinit var systemReleaseRepository: PersistentSystemReleaseRepository
             systemReleaseRepository.createRelease(changeset=serviceRelease1, systemReleaseVersion)
             val serviceRelease2 = ServiceRelease("Service A", 2)
             val exception = assertThrows<SystemReleaseVersionAlreadyExistsException> { systemReleaseRepository.createRelease(changeset=serviceRelease2, systemReleaseVersion) }
-            assertEquals(exception.message, "System release version $systemReleaseVersion already exists")
+            assertEquals("System release version $systemReleaseVersion already exists",exception.message)
         }
     }
-
-
 }

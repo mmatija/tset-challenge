@@ -18,6 +18,7 @@ lateinit var jdbcTemplate: JdbcTemplate
     @AfterEach
     fun cleanup() {
         transactionTemplate.execute {
+            jdbcTemplate.execute("DELETE FROM system_releases")
             jdbcTemplate.execute("DELETE FROM service_releases")
             jdbcTemplate.execute("DELETE FROM system_release_versions")
         }
