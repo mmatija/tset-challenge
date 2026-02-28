@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS system_release_versions (
 CREATE TABLE IF NOT EXISTS system_releases(
     service_name VARCHAR NOT NULL,
     service_version INTEGER NOT NULL,
-    system_release_version INTEGER REFERENCES system_release_versions(version),
+    system_release_version INTEGER REFERENCES system_release_versions(version) NOT NULL,
     FOREIGN KEY (service_name, service_version) REFERENCES  service_releases(service_name, service_version)
 );
 
