@@ -1,4 +1,5 @@
 package org.example.tsetchallenge.models
 
-class ServiceRelease() {
+data class ServiceRelease(val serviceName: String, val serviceVersion: Int) {
+
 }

@@ -1,15 +1,22 @@
 package org.example.tsetchallenge.repository
 
 import org.example.tsetchallenge.models.ServiceRelease
+import org.springframework.jdbc.core.JdbcTemplate
+import org.springframework.stereotype.Repository
 
-class PersistentSystemReleaseRepository : SystemReleaseRepository {
+
+@Repository
+class PersistentSystemReleaseRepository(val jdbcTemplate: JdbcTemplate) : SystemReleaseRepository {
 
     override fun getServiceReleases(systemVersion: Int): List<ServiceRelease> {
-        return listOf()
+        return jdbcTemplate.query("SELECT * FROM service_releases") { resultSet, _ ->
+            ServiceRelease(resultSet.getString("service_name"), resultSet.getInt("service_version"))
+        }
     }
 
     override fun addNewRelease(changeset: ServiceRelease): Int {
-        return 0
+        jdbcTemplate.update("INSERT INTO service_releases(service_name, service_version) VALUES (?, ?)", changeset.serviceName, changeset.serviceVersion)
+        return 1
     }
 
 }
