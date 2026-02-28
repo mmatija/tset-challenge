@@ -22,8 +22,9 @@ lateinit var systemReleaseRepository: PersistentSystemReleaseRepository
     @Test
     fun `createRelease creates new system release for given changeset`() {
         val serviceRelease = ServiceRelease("Service A", 1)
-        val newReleaseVersion = systemReleaseRepository.addNewRelease(changeset=serviceRelease)
-        val releases = systemReleaseRepository.getServiceReleases(systemVersion=newReleaseVersion)
+        val systemReleaseVersion = 1
+        systemReleaseRepository.addNewRelease(changeset=serviceRelease, systemReleaseVersion)
+        val releases = systemReleaseRepository.getServiceReleases(systemVersion=systemReleaseVersion)
         assertTrue { releases.size == 1 }
         assertTrue { releases[0] == serviceRelease }
     }
