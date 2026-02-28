@@ -16,7 +16,7 @@ class PersistentSystemReleaseRepository(val jdbcTemplate: JdbcTemplate, val tran
         }
     }
 
-    override fun addNewRelease(changeset: ServiceRelease, systemReleaseVersion: Int) {
+    override fun createRelease(changeset: ServiceRelease, systemReleaseVersion: Int) {
         try {
             transactionTemplate.execute {
                 jdbcTemplate.update("INSERT INTO service_releases(service_name, service_version) VALUES (?, ?)", changeset.serviceName, changeset.serviceVersion)
