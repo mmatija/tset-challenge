@@ -1,5 +1,14 @@
 package org.example.tsetchallenge.models
 
-data class ServiceRelease(val name: String, val version: Int) {
+import jakarta.validation.constraints.Min
+import jakarta.validation.constraints.NotBlank
+
+data class ServiceRelease(
+    @field:NotBlank
+    val name: String,
+
+    @field:Min(1)
+    val version: Int
+) {
 
 }

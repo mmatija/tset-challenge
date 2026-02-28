@@ -76,7 +76,6 @@ class ReleaseManagerApiTest(@Autowired val mockMvc: MockMvc) : BaseTest() {
 
         @Test
         fun `returns the latest system release version`() {
-            val body = """{"name":"ice A","version":1}"""
             val release = ServiceRelease("service2", 1)
             createServiceRelease(release).andExpect { content { string("1") } }
         }
@@ -86,6 +85,62 @@ class ReleaseManagerApiTest(@Autowired val mockMvc: MockMvc) : BaseTest() {
             val release = ServiceRelease("service3", 1)
             createServiceRelease(release)
             createServiceRelease(release).andExpect { content { string("1") } }
+        }
+
+        @Test
+        fun `returns status code 422 when version is not a positive integer`() {
+            val body = """{"name":"service4","version":0}"""
+            mockMvc.post("/deploy") {
+                contentType = MediaType.APPLICATION_JSON
+                content = body
+            }.andExpect { status { isUnprocessableContent() } }
+        }
+
+        @Test
+        fun `returns error message when version is not positive`() {
+            val body = """{"name":"service4","version":0}"""
+            val expectedErrorMessage = """{"message": "version: must be greater than or equal to 1"}"""
+            mockMvc.post("/deploy") {
+                contentType = MediaType.APPLICATION_JSON
+                content = body
+            }.andExpect { content { json(expectedErrorMessage) } }
+        }
+
+        @Test
+        fun `returns status code 400 when system version is not specified`() {
+            val body = """{"name":"service5"}"""
+            mockMvc.post("/deploy") {
+                contentType = MediaType.APPLICATION_JSON
+                content = body
+            }.andExpect { status { isBadRequest() } }
+        }
+
+        @Test
+        fun `returns status code 422 when name is empty`() {
+            val body = """{"name":"","version":1}"""
+            mockMvc.post("/deploy") {
+                contentType = MediaType.APPLICATION_JSON
+                content = body
+            }.andExpect { status { isUnprocessableContent() } }
+        }
+
+        @Test
+        fun `returns error message when name is empty`() {
+            val body = """{"name":"","version":1}"""
+            val expectedErrorMessage = """{"message": "name: must not be blank"}"""
+            mockMvc.post("/deploy") {
+                contentType = MediaType.APPLICATION_JSON
+                content = body
+            }.andExpect { content { json(expectedErrorMessage) } }
+        }
+
+        @Test
+        fun `returns status code 400 when name is not specified`() {
+            val body = """{"version":1}"""
+            mockMvc.post("/deploy") {
+                contentType = MediaType.APPLICATION_JSON
+                content = body
+            }.andExpect { status { isBadRequest() } }
         }
 
     }
