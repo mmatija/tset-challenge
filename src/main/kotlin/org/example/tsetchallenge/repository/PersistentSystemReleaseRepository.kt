@@ -13,7 +13,7 @@ class PersistentSystemReleaseRepository(val jdbcTemplate: JdbcTemplate, val tran
 
     override fun getServiceReleases(systemVersion: Int): List<ServiceRelease> {
         return jdbcTemplate.query(
-            "SELECT service_name, service_version FROM system_releases WHERE system_release_version = ?",
+            "SELECT service_name, service_version FROM system_releases WHERE system_release_version = ? ORDER BY service_name",
             { resultSet, _ ->
                 ServiceRelease(resultSet.getString("service_name"), resultSet.getInt("service_version"))
             },

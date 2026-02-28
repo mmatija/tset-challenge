@@ -16,11 +16,29 @@ class PersistentSystemReleaseRepositoryTests : BaseTest() {
     @Autowired
     lateinit var systemReleaseRepository: PersistentSystemReleaseRepository
 
-    @Test
-    fun `getServiceReleases returns empty list when there are no service releases for given system version`() {
-        val releases = systemReleaseRepository.getServiceReleases(systemVersion = 1)
-        assertTrue { releases.isEmpty() }
+    @Nested
+    @DisplayName("getServiceReleases")
+    inner class GetServiceReleases {
+
+        @Test
+        fun `returns empty list when there are no service releases for given system version`() {
+            val releases = systemReleaseRepository.getServiceReleases(systemVersion = 1)
+            assertTrue { releases.isEmpty() }
+        }
+
+        @Test
+        fun `returns all service releases associated with given system version in alphabetical order`() {
+            val serviceRelease1 = ServiceRelease("Service B", 1)
+            val serviceRelease2 = ServiceRelease("Service A", 1)
+            systemReleaseRepository.createRelease(changeset = serviceRelease1)
+            systemReleaseRepository.createRelease(changeset = serviceRelease2)
+            val releases = systemReleaseRepository.getServiceReleases(systemVersion = 2)
+            assertEquals(
+                listOf(serviceRelease2, serviceRelease1),
+                releases.sortedBy { serviceRelease -> serviceRelease.name })
+        }
     }
+
 
     @Nested
     @DisplayName("createRelease")
