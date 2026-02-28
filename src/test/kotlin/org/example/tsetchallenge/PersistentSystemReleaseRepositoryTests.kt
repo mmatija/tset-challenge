@@ -3,6 +3,7 @@ package org.example.tsetchallenge
 import org.example.tsetchallenge.models.ServiceRelease
 import org.example.tsetchallenge.repository.PersistentSystemReleaseRepository
 import org.example.tsetchallenge.repository.ServiceReleaseAlreadyExistsException
+import org.example.tsetchallenge.repository.SystemReleaseVersionAlreadyExistsException
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -44,6 +45,16 @@ lateinit var systemReleaseRepository: PersistentSystemReleaseRepository
             systemReleaseRepository.addNewRelease(changeset=serviceRelease, systemReleaseVersion=1)
             val exception = assertThrows<ServiceReleaseAlreadyExistsException> { systemReleaseRepository.addNewRelease(changeset=serviceRelease, systemReleaseVersion=2) }
             assertEquals(exception.message, "Release version ${serviceRelease.serviceVersion} for service ${serviceRelease.serviceName} already exists")
+        }
+
+        @Test
+        fun `throws an exception if system release version already exists`() {
+            val serviceRelease1 = ServiceRelease("Service A", 1)
+            val systemReleaseVersion = 1
+            systemReleaseRepository.addNewRelease(changeset=serviceRelease1, systemReleaseVersion)
+            val serviceRelease2 = ServiceRelease("Service A", 2)
+            val exception = assertThrows<SystemReleaseVersionAlreadyExistsException> { systemReleaseRepository.addNewRelease(changeset=serviceRelease2, systemReleaseVersion) }
+            assertEquals(exception.message, "System release version $systemReleaseVersion already exists")
         }
     }
 
