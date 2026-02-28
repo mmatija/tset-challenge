@@ -1,6 +1,7 @@
 package org.example.tsetchallenge.repository
 
 import org.example.tsetchallenge.models.ServiceRelease
+import org.springframework.dao.DuplicateKeyException
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.stereotype.Repository
 
@@ -15,7 +16,11 @@ class PersistentSystemReleaseRepository(val jdbcTemplate: JdbcTemplate) : System
     }
 
     override fun addNewRelease(changeset: ServiceRelease, systemReleaseVersion: Int) {
-        jdbcTemplate.update("INSERT INTO service_releases(service_name, service_version) VALUES (?, ?)", changeset.serviceName, changeset.serviceVersion)
+        try {
+            jdbcTemplate.update("INSERT INTO service_releases(service_name, service_version) VALUES (?, ?)", changeset.serviceName, changeset.serviceVersion)
+        } catch (e: DuplicateKeyException) {
+            throw ServiceReleaseAlreadyExistsException("Release version ${changeset.serviceVersion} for service ${changeset.serviceName} already exists")
+        }
     }
 
 }

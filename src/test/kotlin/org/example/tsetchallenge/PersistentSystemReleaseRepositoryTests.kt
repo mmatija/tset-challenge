@@ -2,9 +2,14 @@ package org.example.tsetchallenge
 
 import org.example.tsetchallenge.models.ServiceRelease
 import org.example.tsetchallenge.repository.PersistentSystemReleaseRepository
+import org.example.tsetchallenge.repository.ServiceReleaseAlreadyExistsException
+import org.junit.jupiter.api.DisplayName
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
+import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 @SpringBootTest
@@ -19,14 +24,28 @@ lateinit var systemReleaseRepository: PersistentSystemReleaseRepository
         assertTrue { releases.isEmpty() }
     }
 
-    @Test
-    fun `createRelease creates new system release for given changeset`() {
-        val serviceRelease = ServiceRelease("Service A", 1)
-        val systemReleaseVersion = 1
-        systemReleaseRepository.addNewRelease(changeset=serviceRelease, systemReleaseVersion)
-        val releases = systemReleaseRepository.getServiceReleases(systemVersion=systemReleaseVersion)
-        assertTrue { releases.size == 1 }
-        assertTrue { releases[0] == serviceRelease }
+    @Nested
+    @DisplayName("createRelease")
+    inner class CreateRelease {
+
+        @Test
+        fun `creates new system release for given changeset`() {
+            val serviceRelease = ServiceRelease("Service A", 1)
+            val systemReleaseVersion = 1
+            systemReleaseRepository.addNewRelease(changeset=serviceRelease, systemReleaseVersion)
+            val releases = systemReleaseRepository.getServiceReleases(systemVersion=systemReleaseVersion)
+            assertTrue { releases.size == 1 }
+            assertTrue { releases[0] == serviceRelease }
+        }
+
+        @Test
+        fun `throws an exception if service release already exists`() {
+            val serviceRelease = ServiceRelease("Service A", 1)
+            systemReleaseRepository.addNewRelease(changeset=serviceRelease, systemReleaseVersion=1)
+            val exception = assertThrows<ServiceReleaseAlreadyExistsException> { systemReleaseRepository.addNewRelease(changeset=serviceRelease, systemReleaseVersion=2) }
+            assertEquals(exception.message, "Release version ${serviceRelease.serviceVersion} for service ${serviceRelease.serviceName} already exists")
+        }
     }
+
 
 }
