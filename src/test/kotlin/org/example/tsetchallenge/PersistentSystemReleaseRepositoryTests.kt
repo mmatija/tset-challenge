@@ -33,9 +33,7 @@ class PersistentSystemReleaseRepositoryTests : BaseTest() {
             systemReleaseRepository.createRelease(changeset = serviceRelease1)
             systemReleaseRepository.createRelease(changeset = serviceRelease2)
             val releases = systemReleaseRepository.getServiceReleases(systemVersion = 2)
-            assertEquals(
-                listOf(serviceRelease2, serviceRelease1),
-                releases.sortedBy { serviceRelease -> serviceRelease.name })
+            assertEquals(listOf(serviceRelease2, serviceRelease1), releases)
         }
     }
 
@@ -88,9 +86,7 @@ class PersistentSystemReleaseRepositoryTests : BaseTest() {
             systemReleaseRepository.createRelease(changeset = serviceRelease2)
             systemReleaseRepository.createRelease(changeset = serviceRelease3)
             val releases = systemReleaseRepository.getServiceReleases(systemVersion = 3)
-            assertEquals(
-                listOf(serviceRelease3, serviceRelease2),
-                releases.sortedBy { serviceRelease -> serviceRelease.name })
+            assertEquals(listOf(serviceRelease3, serviceRelease2), releases)
         }
 
         @Test
@@ -102,9 +98,7 @@ class PersistentSystemReleaseRepositoryTests : BaseTest() {
             systemReleaseRepository.createRelease(changeset = serviceRelease2)
             systemReleaseRepository.createRelease(changeset = serviceRelease3)
             val releases = systemReleaseRepository.getServiceReleases(systemVersion = 2)
-            assertEquals(
-                listOf(serviceRelease1, serviceRelease2),
-                releases.sortedBy { serviceRelease -> serviceRelease.name })
+            assertEquals(listOf(serviceRelease1, serviceRelease2), releases)
         }
     }
 }
