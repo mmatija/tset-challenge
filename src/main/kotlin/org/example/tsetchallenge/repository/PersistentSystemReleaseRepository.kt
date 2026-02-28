@@ -30,15 +30,8 @@ class PersistentSystemReleaseRepository(val jdbcTemplate: JdbcTemplate, val tran
                 )
                 jdbcTemplate.update("INSERT INTO system_release_versions(version) VALUES (?)", systemReleaseVersion)
                 jdbcTemplate.update(
-                    "INSERT INTO system_releases(service_name, service_version, system_release_version) VALUES (?, ?, ?)",
-                    changeset.serviceName,
-                    changeset.serviceVersion,
+                    "INSERT INTO system_releases(service_name, service_version, system_release_version) select distinct on (service_name) service_name, service_version, ? FROM service_releases ORDER BY service_name, service_version DESC",
                     systemReleaseVersion
-                )
-                jdbcTemplate.update(
-                    "INSERT INTO system_releases(service_name, service_version, system_release_version) select distinct on (service_name) service_name, service_version, ? FROM system_releases WHERE service_name != ? ORDER BY service_name, service_version DESC",
-                    systemReleaseVersion,
-                    changeset.serviceName
                 )
             }
         } catch (e: DuplicateKeyException) {
