@@ -2,6 +2,7 @@ package org.example.tsetchallenge.api
 
 import jakarta.validation.constraints.Positive
 import org.example.tsetchallenge.models.ServiceRelease
+import org.example.tsetchallenge.repository.SystemReleaseRepository
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
@@ -16,11 +17,11 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 
 @RestController
 @RequestMapping("/services")
-class Services {
+class Services(val systemReleaseRepository: SystemReleaseRepository) {
 
     @RequestMapping(value = [""], method = [RequestMethod.GET], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun getServices(@RequestParam @Positive systemVersion: Int): List<ServiceRelease> {
-        return listOf()
+        return systemReleaseRepository.getServiceReleases(systemVersion)
     }
 
     @ExceptionHandler(MissingServletRequestParameterException::class)

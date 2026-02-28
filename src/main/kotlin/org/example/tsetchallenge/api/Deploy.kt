@@ -4,6 +4,7 @@ import org.example.tsetchallenge.models.ServiceRelease
 import org.example.tsetchallenge.repository.SystemReleaseRepository
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
+import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestMethod
 import org.springframework.web.bind.annotation.ResponseStatus
@@ -15,8 +16,7 @@ class Deploy(val systemReleaseRepository: SystemReleaseRepository) {
 
     @RequestMapping(value = [""], method = [RequestMethod.POST], produces = [MediaType.APPLICATION_JSON_VALUE])
     @ResponseStatus(HttpStatus.OK)
-    fun createDeployment(): Int {
-        val release = ServiceRelease("service1", 1)
-        return systemReleaseRepository.createRelease(release)
+    fun createDeployment(@RequestBody serviceRelease: ServiceRelease): Int {
+        return systemReleaseRepository.createRelease(serviceRelease)
     }
 }

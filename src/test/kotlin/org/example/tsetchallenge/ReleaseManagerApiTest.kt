@@ -1,5 +1,6 @@
 package org.example.tsetchallenge
 
+import org.example.tsetchallenge.models.ServiceRelease
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -14,7 +15,7 @@ import org.springframework.test.web.servlet.post
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
-class ReleaseManagerApiTest(@Autowired val mockMvc: MockMvc): BaseTest() {
+class ReleaseManagerApiTest(@Autowired val mockMvc: MockMvc) : BaseTest() {
 
     @Nested
     @DisplayName("GET /services")
@@ -22,6 +23,16 @@ class ReleaseManagerApiTest(@Autowired val mockMvc: MockMvc): BaseTest() {
         @Test
         fun `returns status code 200`() {
             mockMvc.get("/services?systemVersion=1").andExpect { status { isOk() } }
+        }
+
+        @Test
+        fun `returns all service releases for given system version`() {
+            val serviceRelease1 = ServiceRelease("service1", 1)
+            val serviceRelease2 = ServiceRelease("service2", 1)
+            createServiceRelease(serviceRelease1)
+            createServiceRelease(serviceRelease2)
+            val expectedResponseBody = """[{"name":"service1","version":1},{"name":"service2","version":1}]"""
+            mockMvc.get("/services?systemVersion=2").andExpect { content { json(expectedResponseBody) } }
         }
 
         @Test
@@ -59,19 +70,21 @@ class ReleaseManagerApiTest(@Autowired val mockMvc: MockMvc): BaseTest() {
 
         @Test
         fun `returns status code 200`() {
-            val body = """{"name":"Service A","version":1}"""
-            sendRequest(body).andExpect { status { isOk() } }
+            val release = ServiceRelease("service1", 1)
+            createServiceRelease(release).andExpect { status { isOk() } }
         }
 
         @Test
         fun `returns the latest system release version`() {
-            val body = """{"name":"Service A","version":1}"""
-            sendRequest(body).andExpect { content { string("1") } }
+            val body = """{"name":"ice A","version":1}"""
+            val release = ServiceRelease("service2", 1)
+            createServiceRelease(release).andExpect { content { string("1") } }
         }
 
-        private fun sendRequest(body: String): ResultActionsDsl = mockMvc.post("/deploy") {
-            contentType = MediaType.APPLICATION_JSON
-            content = body
-        }
+    }
+
+    private fun createServiceRelease(serviceRelease: ServiceRelease): ResultActionsDsl = mockMvc.post("/deploy") {
+        contentType = MediaType.APPLICATION_JSON
+        content = """{"name":"${serviceRelease.name}","version":${serviceRelease.version}}"""
     }
 }

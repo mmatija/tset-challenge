@@ -72,7 +72,7 @@ class PersistentSystemReleaseRepositoryTests : BaseTest() {
             val releases = systemReleaseRepository.getServiceReleases(systemVersion = 3)
             assertEquals(
                 listOf(serviceRelease3, serviceRelease2),
-                releases.sortedBy { serviceRelease -> serviceRelease.serviceName })
+                releases.sortedBy { serviceRelease -> serviceRelease.name })
         }
 
         @Test
@@ -86,7 +86,7 @@ class PersistentSystemReleaseRepositoryTests : BaseTest() {
             val releases = systemReleaseRepository.getServiceReleases(systemVersion = 2)
             assertEquals(
                 listOf(serviceRelease1, serviceRelease2),
-                releases.sortedBy { serviceRelease -> serviceRelease.serviceName })
+                releases.sortedBy { serviceRelease -> serviceRelease.name })
         }
     }
 }

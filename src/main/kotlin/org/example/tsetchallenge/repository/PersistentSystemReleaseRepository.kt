@@ -51,8 +51,8 @@ class PersistentSystemReleaseRepository(val jdbcTemplate: JdbcTemplate, val tran
     private fun createServiceRelease(changeset: ServiceRelease) {
         jdbcTemplate.update(
             "INSERT INTO service_releases(service_name, service_version) VALUES (?, ?)",
-            changeset.serviceName,
-            changeset.serviceVersion
+            changeset.name,
+            changeset.version
         )
     }
 
