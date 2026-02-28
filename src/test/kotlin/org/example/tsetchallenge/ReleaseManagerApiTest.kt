@@ -22,7 +22,7 @@ class ReleaseManagerApiTest(@Autowired val mockMvc: MockMvc) : BaseTest() {
     inner class GetReleases {
         @Test
         fun `returns status code 200`() {
-            mockMvc.get("/services?systemVersion=1").andExpect { status { isOk() } }
+            getServices(systemVersion = 1).andExpect { status { isOk() } }
         }
 
         @Test
@@ -32,29 +32,29 @@ class ReleaseManagerApiTest(@Autowired val mockMvc: MockMvc) : BaseTest() {
             createServiceRelease(serviceRelease1)
             createServiceRelease(serviceRelease2)
             val expectedResponseBody = """[{"name":"service1","version":1},{"name":"service2","version":1}]"""
-            mockMvc.get("/services?systemVersion=2").andExpect { content { json(expectedResponseBody) } }
+            getServices(systemVersion=2).andExpect { content { json(expectedResponseBody) } }
         }
 
         @Test
         fun `returns status code 400 when system version is not specified`() {
-            mockMvc.get("/services").andExpect { status { isBadRequest() } }
+            getServices().andExpect { status { isBadRequest() } }
         }
 
         @Test
         fun `returns error message when system version is not specified`() {
             val expectedErrorMessage = """{"message": "systemVersion parameter is missing"}"""
-            mockMvc.get("/services").andExpect { content { json(expectedErrorMessage) } }
+            getServices().andExpect { content { json(expectedErrorMessage) } }
         }
 
         @Test
         fun `returns status code 422 when systemVersion is not a positive integer`() {
-            mockMvc.get("/services?systemVersion=0").andExpect { status { isUnprocessableContent() } }
+            getServices(0).andExpect { status { isUnprocessableContent() } }
         }
 
         @Test
         fun `returns error message when systemVersion is not positive`() {
             val expectedErrorMessage = """{"message": "systemVersion parameter must be a positive integer"}"""
-            mockMvc.get("/services?systemVersion=0").andExpect { content { json(expectedErrorMessage) } }
+            getServices(0).andExpect { content { json(expectedErrorMessage) } }
         }
 
         @Test
@@ -62,6 +62,9 @@ class ReleaseManagerApiTest(@Autowired val mockMvc: MockMvc) : BaseTest() {
             val expectedErrorMessage = """{"message": "systemVersion parameter must be a positive integer"}"""
             mockMvc.get("/services?systemVersion=1.2").andExpect { content { json(expectedErrorMessage) } }
         }
+
+        private fun getServices(systemVersion: Int? = null) = mockMvc.get( if (systemVersion != null) "/services?systemVersion=${systemVersion}" else "/services" )
+
     }
 
     @Nested
@@ -90,57 +93,44 @@ class ReleaseManagerApiTest(@Autowired val mockMvc: MockMvc) : BaseTest() {
         @Test
         fun `returns status code 422 when version is not a positive integer`() {
             val body = """{"name":"service4","version":0}"""
-            mockMvc.post("/deploy") {
-                contentType = MediaType.APPLICATION_JSON
-                content = body
-            }.andExpect { status { isUnprocessableContent() } }
+            createServiceRelease(body).andExpect { status { isUnprocessableContent() } }
         }
 
         @Test
         fun `returns error message when version is not positive`() {
             val body = """{"name":"service4","version":0}"""
             val expectedErrorMessage = """{"message": "version: must be greater than or equal to 1"}"""
-            mockMvc.post("/deploy") {
-                contentType = MediaType.APPLICATION_JSON
-                content = body
-            }.andExpect { content { json(expectedErrorMessage) } }
+            createServiceRelease(body).andExpect { content { json(expectedErrorMessage) } }
         }
 
         @Test
         fun `returns status code 400 when system version is not specified`() {
             val body = """{"name":"service5"}"""
-            mockMvc.post("/deploy") {
-                contentType = MediaType.APPLICATION_JSON
-                content = body
-            }.andExpect { status { isBadRequest() } }
+            createServiceRelease(body).andExpect { status { isBadRequest() } }
         }
 
         @Test
         fun `returns status code 422 when name is empty`() {
             val body = """{"name":"","version":1}"""
-            mockMvc.post("/deploy") {
-                contentType = MediaType.APPLICATION_JSON
-                content = body
-            }.andExpect { status { isUnprocessableContent() } }
+            createServiceRelease(body).andExpect { status { isUnprocessableContent() } }
         }
 
         @Test
         fun `returns error message when name is empty`() {
             val body = """{"name":"","version":1}"""
             val expectedErrorMessage = """{"message": "name: must not be blank"}"""
-            mockMvc.post("/deploy") {
-                contentType = MediaType.APPLICATION_JSON
-                content = body
-            }.andExpect { content { json(expectedErrorMessage) } }
+            createServiceRelease(body).andExpect { content { json(expectedErrorMessage) } }
         }
 
         @Test
         fun `returns status code 400 when name is not specified`() {
             val body = """{"version":1}"""
-            mockMvc.post("/deploy") {
-                contentType = MediaType.APPLICATION_JSON
-                content = body
-            }.andExpect { status { isBadRequest() } }
+            createServiceRelease(body).andExpect { status { isBadRequest() } }
+        }
+
+        private fun createServiceRelease(body: String): ResultActionsDsl = mockMvc.post("/deploy") {
+            contentType = MediaType.APPLICATION_JSON
+            content = body
         }
 
     }
