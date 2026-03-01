@@ -47,8 +47,7 @@ class PersistentSystemReleaseRepositoryTests : BaseTest() {
             val serviceRelease = ServiceRelease("Service A", 1)
             systemReleaseRepository.createRelease(changeset = serviceRelease)
             val releases = systemReleaseRepository.getServiceReleases(systemVersion = 1)
-            assertTrue { releases.size == 1 }
-            assertTrue { releases[0] == serviceRelease }
+            assertEquals(listOf(serviceRelease), releases)
         }
 
         @Test
@@ -64,7 +63,8 @@ class PersistentSystemReleaseRepositoryTests : BaseTest() {
         @Test
         fun `returns new system release version if service release does not exist`() {
             val serviceRelease = ServiceRelease("Service A", 1)
-            assertEquals(1, systemReleaseRepository.createRelease(changeset = serviceRelease))
+            val response = systemReleaseRepository.createRelease(changeset = serviceRelease)
+            assertEquals(1, response)
         }
 
         @Test
@@ -74,7 +74,8 @@ class PersistentSystemReleaseRepositoryTests : BaseTest() {
             val serviceRelease3 = ServiceRelease("Service A", 1)
             systemReleaseRepository.createRelease(changeset = serviceRelease1)
             systemReleaseRepository.createRelease(changeset = serviceRelease2)
-            assertEquals(2, systemReleaseRepository.createRelease(changeset = serviceRelease3))
+            val response = systemReleaseRepository.createRelease(changeset = serviceRelease3)
+            assertEquals(2, response)
         }
 
         @Test
