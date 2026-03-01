@@ -67,3 +67,7 @@ It also allowed me to design `POST /deploy` endpoint to be idempotent, without t
 ### Not adding pagination
 
 Following the same rationale as with data duplication, we don't expect to have a very high number of deployed services at any given time, so we can afford to fetch all of them without pagination and still have good performance.
+
+### Using JDBC template instead of JPA/Hibernate
+I decided to use JDBC template for database access because the queries are simple enough and I wanted to have more control over the SQL queries being executed.
+Using JPA/Hibernate would add unnecessary complexity and overhead for such a simple use case.
